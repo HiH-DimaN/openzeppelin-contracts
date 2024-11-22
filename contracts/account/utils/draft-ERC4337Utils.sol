@@ -21,9 +21,11 @@ library ERC4337Utils {
     uint256 internal constant SIG_VALIDATION_FAILED = 1;
 
     /// @dev Parses the validation data into its components. See {packValidationData}.
-    function parseValidationData(
-        uint256 validationData
-    ) internal pure returns (address aggregator, uint48 validAfter, uint48 validUntil) {
+    function parseValidationData(uint256 validationData)
+        internal
+        pure
+        returns (address aggregator, uint48 validAfter, uint48 validUntil)
+    {
         validAfter = uint48(bytes32(validationData).extract_32_6(0x00));
         validUntil = uint48(bytes32(validationData).extract_32_6(0x06));
         aggregator = address(bytes32(validationData).extract_32_20(0x0c));
@@ -31,22 +33,25 @@ library ERC4337Utils {
     }
 
     /// @dev Packs the validation data into a single uint256. See {parseValidationData}.
-    function packValidationData(
-        address aggregator,
-        uint48 validAfter,
-        uint48 validUntil
-    ) internal pure returns (uint256) {
+    function packValidationData(address aggregator, uint48 validAfter, uint48 validUntil)
+        internal
+        pure
+        returns (uint256)
+    {
         return uint256(bytes6(validAfter).pack_6_6(bytes6(validUntil)).pack_12_20(bytes20(aggregator)));
     }
 
     /// @dev Same as {packValidationData}, but with a boolean signature success flag.
-    function packValidationData(bool sigSuccess, uint48 validAfter, uint48 validUntil) internal pure returns (uint256) {
-        return
-            packValidationData(
-                address(uint160(Math.ternary(sigSuccess, SIG_VALIDATION_SUCCESS, SIG_VALIDATION_FAILED))),
-                validAfter,
-                validUntil
-            );
+    function packValidationData(bool sigSuccess, uint48 validAfter, uint48 validUntil)
+        internal
+        pure
+        returns (uint256)
+    {
+        return packValidationData(
+            address(uint160(Math.ternary(sigSuccess, SIG_VALIDATION_SUCCESS, SIG_VALIDATION_FAILED))),
+            validAfter,
+            validUntil
+        );
     }
 
     /**
@@ -66,17 +71,21 @@ library ERC4337Utils {
     }
 
     /// @dev Returns the aggregator of the `validationData` and whether it is out of time range.
-    function getValidationData(uint256 validationData) internal view returns (address aggregator, bool outOfTimeRange) {
+    function getValidationData(uint256 validationData)
+        internal
+        view
+        returns (address aggregator, bool outOfTimeRange)
+    {
         (address aggregator_, uint48 validAfter, uint48 validUntil) = parseValidationData(validationData);
         return (aggregator_, block.timestamp < validAfter || validUntil < block.timestamp);
     }
 
     /// @dev Computes the hash of a user operation for a given entrypoint and chainid.
-    function hash(
-        PackedUserOperation calldata self,
-        address entrypoint,
-        uint256 chainid
-    ) internal pure returns (bytes32) {
+    function hash(PackedUserOperation calldata self, address entrypoint, uint256 chainid)
+        internal
+        pure
+        returns (bytes32)
+    {
         bytes32 result = keccak256(
             abi.encode(
                 keccak256(
